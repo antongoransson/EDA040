@@ -8,7 +8,7 @@ public class ButtonThread extends Thread {
 	private int prevState, currentState;
 	private ClockInput input;
 	private Semaphore sem;
-
+	
 	public ButtonThread(SharedData sd) {
 		this.sd = sd;
 		this.input = sd.getInput();
@@ -21,11 +21,15 @@ public class ButtonThread extends Thread {
 			sem.take();
 			sd.upDateAlarmFlag(input.getAlarmFlag());
 			currentState = input.getChoice();
+
 			if (currentState != prevState) {
-				// do
+				if (sd.alarmIsOn()) {
+					sd.setAlarm(false);
+				}
 
 				if (prevState == 1) {
 					sd.upDateAlarmTime(input.getValue());
+					
 				} else if (prevState == 2) {
 					sd.updateTime(input.getValue());
 				}

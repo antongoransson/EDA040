@@ -10,32 +10,30 @@ public class SharedData {
 	private boolean alarmFlag;
 	private ClockInput input;
 	private MutexSem sem;
+	private boolean alarmOn;
 
 	public SharedData(ClockInput input) {
 		this.input = input;
 		sem = new MutexSem();
 		currentTime = 55;
 		alarmFlag = false;
+		alarmOn = false;
 	}
 
 	public void updateTime(int time) {
 		sem.take();
-		System.out.println("Hold the door" + time);
 		int tempTime = time;
 		int sec = time % 100;
 		if (sec > 59) {
-			tempTime += 100;
-			tempTime -= 60;
+			tempTime +=40;
 		}
 		int min = tempTime % 10000;
 		if (min > 5959) {
-			tempTime += 10000;
-			tempTime -= 6000;
+			tempTime += 4000;
 		}
 		if (tempTime > 235959) {
 			tempTime = 0;
 		}
-		System.out.println("Blapblpop" + currentTime);
 		currentTime = tempTime;
 		sem.give();
 	}
@@ -68,6 +66,15 @@ public class SharedData {
 
 	public boolean doAlarm() {
 		return (alarmTime == currentTime && alarmFlag);
+	}
+
+	public void setAlarm(boolean b) {
+		alarmOn = b;
+
+	}
+
+	public boolean alarmIsOn() {
+		return alarmOn;
 	}
 
 }
