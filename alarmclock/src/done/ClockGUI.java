@@ -32,7 +32,6 @@ public class ClockGUI extends Applet implements KeyListener, ClockTimeDisplay, I
 	int alarmtime = 0;// Alarm time
 	private int inputval = 0;// Input value
 	private boolean	hiding = false;
-	private AlarmClock	control;
 	boolean	alarmpulse = false;
 	private Checkbox	chb_alarmon;
 	private ClockCanvas	clkcanvas;
@@ -75,9 +74,6 @@ public class ClockGUI extends Applet implements KeyListener, ClockTimeDisplay, I
 		
 		clkinput = new ClockInput();
 		clkoutput = new ClockOutput(this);
-		
-		// Instantiate alarm-clock software using application interfaces.
-		control = new AlarmClock(clkinput, clkoutput);
 	}
 
 	private void onInput() {
@@ -278,7 +274,7 @@ public class ClockGUI extends Applet implements KeyListener, ClockTimeDisplay, I
 			// Control software already running, activate GUI updates:
 			hiding = false;
 		} else {
-			 control.start();
+			new AlarmClock(clkinput, clkoutput);
 		}
 	}
 	

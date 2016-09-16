@@ -1,31 +1,34 @@
 package todo;
 
-import java.util.concurrent.Semaphore;
-
 import done.ClockInput;
+import done.ClockOutput;
 import se.lth.cs.realtime.semaphore.MutexSem;
 
 public class SharedData {
 	private int currentTime, alarmTime;
+	private int alarmCounter = 0;
 	private boolean alarmFlag;
 	private ClockInput input;
 	private MutexSem sem;
 	private boolean alarmOn;
+	private ClockOutput output;
 
-	public SharedData(ClockInput input) {
+	public SharedData(ClockInput input, ClockOutput output) {
 		this.input = input;
 		sem = new MutexSem();
 		currentTime = 55;
 		alarmFlag = false;
 		alarmOn = false;
+		this.output = output;
 	}
 
-	public void updateTime(int time) {
+	public void updateTime() {
 		sem.take();
-		int tempTime = time;
-		int sec = time % 100;
+		currentTime++;
+		int tempTime = currentTime;
+		int sec = currentTime % 100;
 		if (sec > 59) {
-			tempTime +=40;
+			tempTime += 40;
 		}
 		int min = tempTime % 10000;
 		if (min > 5959) {
@@ -35,7 +38,35 @@ public class SharedData {
 			tempTime = 0;
 		}
 		currentTime = tempTime;
+		output.showTime(currentTime);
+		checkIfAlarm();
 		sem.give();
+	}
+	private void checkIfAlarm(){
+		if (alarmTime == currentTime && alarmFlag || alarmIsOn()) {
+			setAlarm(true);
+			alarm();
+		}
+	}
+
+	public void setTime(int time) {
+		sem.take();
+		int tempTime = time;
+		int sec = time % 100;
+		if (sec > 59) {
+			tempTime += 40;
+		}
+		int min = tempTime % 10000;
+		if (min > 5959) {
+			tempTime += 4000;
+		}
+		if (tempTime > 235959) {
+			tempTime = 0;
+		}
+		currentTime = tempTime;
+		output.showTime(currentTime);
+		sem.give();
+		checkIfAlarm();
 	}
 
 	public void upDateAlarmTime(int time) {
@@ -45,36 +76,35 @@ public class SharedData {
 	}
 
 	public void upDateAlarmFlag(boolean b) {
+		sem.take();
 		alarmFlag = b;
-	}
-
-	public boolean getAlarmFlag() {
-		return alarmFlag;
+		sem.give();
 	}
 
 	public ClockInput getInput() {
 		return input;
-
 	}
-
-	public int getTime() {
-		sem.take();
-		sem.give();
-		return currentTime;
-
-	}
-
-	public boolean doAlarm() {
-		return (alarmTime == currentTime && alarmFlag);
-	}
-
+	
 	public void setAlarm(boolean b) {
+		sem.take();
 		alarmOn = b;
-
+		sem.give();
 	}
 
 	public boolean alarmIsOn() {
-		return alarmOn;
+		boolean ans = alarmOn;
+		return ans;
+	}
+
+	private void alarm() {
+		if (alarmIsOn() && alarmCounter < 20){
+			setAlarm(true);
+			output.doAlarm();
+			alarmCounter++;
+		} else {
+			alarmCounter = 0;
+			setAlarm(false);
+		}
 	}
 
 }

@@ -21,7 +21,6 @@ public class ButtonThread extends Thread {
 			sem.take();
 			sd.upDateAlarmFlag(input.getAlarmFlag());
 			currentState = input.getChoice();
-
 			if (currentState != prevState) {
 				if (sd.alarmIsOn()) {
 					sd.setAlarm(false);
@@ -31,7 +30,7 @@ public class ButtonThread extends Thread {
 					sd.upDateAlarmTime(input.getValue());
 					
 				} else if (prevState == 2) {
-					sd.updateTime(input.getValue());
+					sd.setTime(input.getValue());
 				}
 				prevState = currentState;
 			}
