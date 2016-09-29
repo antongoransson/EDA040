@@ -88,12 +88,13 @@ public class LiftView {
 	public static void main(String[] args) {
 		LiftView lv = new LiftView();
 		lv.drawLift(0,3);
-		lv.drawLevel(5,4);
+		lv.drawLevel(5,7);
 		try {
 			Thread.sleep(1000);
 		} catch(InterruptedException e) { }
 		lv.moveLift(0,1);
 		lv.drawLift(1,2);
+		
 	}
 
 	private class FixedSizePanel extends JPanel {
