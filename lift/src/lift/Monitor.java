@@ -16,7 +16,20 @@ public class Monitor {
 
 	}
 
-	public void setNext() {
+	public synchronized int getHere() {
+		return here;
+	}
+
+	public synchronized void updateHere() {
+		here = next;
+		notifyAll();
+	}
+
+	public synchronized int getNext() {
+		return next;
+	}
+
+	private synchronized void setNext() {
 		if (next + 1 > 6) {
 			next -= 1;
 			moveUp = false;
@@ -28,7 +41,6 @@ public class Monitor {
 		} else {
 			next--;
 		}
-		view.moveLift(here, next);
 	}
 
 	private synchronized void drawLevel(int floor) {
@@ -43,75 +55,52 @@ public class Monitor {
 	public synchronized void addPersonAtFloor(int floor) {
 		waitEntry[floor]++;
 		drawLevel(floor);
+		notifyAll();
 	}
 
-	public synchronized boolean addPersonToLift(int startFloor, int destFloor) {
-		if (startFloor == here && load < 4) {
-			waitExit[destFloor]++;
-			waitEntry[here]--;
-			load++;
-			drawLift();
-			drawLevel(here);
-			notifyAll();
-			return true;
-		}
-		try {
+	public synchronized void addPersonToLift(int startFloor, int destFloor) throws InterruptedException {
+		while (!((startFloor == here && load < 4))) {
 			wait();
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
 		}
-		return false;
+		waitExit[destFloor]++;
+		waitEntry[here]--;
+		load++;
+		drawLift();
+		drawLevel(here);
+		notifyAll();
 	}
 
-	public synchronized boolean removePersonFromLift(int floor) {
-		if (floor == here) {
-			load--;
-			waitExit[floor]--;
-			drawLift();
-			notifyAll();
-			return true;
-		}
-		try {
+	public synchronized boolean removePersonFromLift(int floor) throws InterruptedException {
+		while (!(floor == here)) {
 			wait();
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
 		}
-		return false;
-
+		load--;
+		waitExit[floor]--;
+		drawLift();
+		notifyAll();
+		return true;
 	}
 
-	public synchronized void moveLift() {
-		boolean pepesInSystem = false;
-		for(int i = 0; i < 7; i++){
-			if(waitExit[i] != 0 || waitEntry[i] != 0){
-				pepesInSystem = true;
+	public synchronized boolean moveLift() throws InterruptedException {
+		boolean personsInSystem = false;
+		for (int i = 0; i < 7; i++) {
+			if (waitExit[i] != 0 || waitEntry[i] != 0) {
+				personsInSystem = true;
 			}
 		}
-		if (here == next && pepesInSystem) {
-			if (waitExit[here] > 0) {
-				try {
-					wait();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+		while (!personsInSystem
+				|| ((here == next && personsInSystem) && ((waitExit[here] > 0) || (waitEntry[here] > 0 && load < 4)))) {
+			wait();
+			for (int i = 0; i < 7; i++) {
+				if (waitExit[i] != 0 || waitEntry[i] != 0) {
+					personsInSystem = true;
 				}
-			} else if (waitEntry[here] > 0 && load < 4) {
-				try {
-					wait();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-			} else {
-				setNext();
-				notifyAll();
 			}
-		} else {
-			here = next;
+
 		}
+		setNext();
+		notifyAll();
+		return true;
 
 	}
 }

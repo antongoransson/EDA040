@@ -8,7 +8,7 @@ public class Main {
 		for(int i =0; i < 20; i++){
 			new Person(m).start();
 		}
-		Lift l = new Lift(m);
+		Lift l = new Lift(m,v);
 		l.start();
 	}
 }
