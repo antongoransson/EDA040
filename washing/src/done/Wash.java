@@ -40,7 +40,7 @@ public class Wash {
 		// Options
 		double theSpeed             = 50.0;
 		boolean useHackerPanel      = false;
-		double freakShowProbability = 0.00333333;    // Once a minute
+		double freakShowProbability = 1.00333333;    // Once a minute
 		// Read options
 		for(int i = 0; i < args.length; i++) {
 			if (args[i].equals("-speed") && i < (args.length - 1)) {
