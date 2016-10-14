@@ -8,32 +8,33 @@ public class WashingController implements ButtonListener {
 	private WaterController waterControl;
 	private SpinController spinControl;
 	private double theSpeed;
-	// TODO: add suitable attributes
+	WashingProgram w;
 
 	public WashingController(AbstractWashingMachine theMachine, double theSpeed) {
-		// TODO: implement this constructo
 		this.theMachine = theMachine;
-		this.theSpeed = 100;
+		this.theSpeed = 10;
 		tempControl = new TemperatureController(theMachine, this.theSpeed);
-		System.out.println("temp ");
 		waterControl = new WaterController(theMachine, this.theSpeed);
-		System.out.println("temp + water");
 		spinControl = new SpinController(theMachine, this.theSpeed);
 		tempControl.start();
 		waterControl.start();
 		spinControl.start();
+		w = new WashingProgram1(theMachine, theSpeed, tempControl, waterControl, spinControl);
 	}
 
 	public void processButton(int theButton) {
-		System.out.println("iabidop");
-		if (theButton == 1) {
-			System.out.println("hej");
-			new WashingProgram1(theMachine, theSpeed, tempControl, waterControl, spinControl).start();	
-			// TODO: implement this method
-		} else if (theButton == 2) {
-
-		} else if (theButton == 3) {
-
+		if (theButton == 1 && !(w.isAlive())) {
+			w = new WashingProgram1(theMachine, theSpeed, tempControl, waterControl, spinControl);
+			w.start();
+		} else if (theButton == 2 && !(w.isAlive())) {
+			w = new WashingProgram2(theMachine, theSpeed, tempControl, waterControl, spinControl);
+			w.start();	
+		} else if (theButton == 3 && !(w.isAlive())) {
+			w = new WashingProgram3(theMachine, theSpeed, tempControl, waterControl, spinControl);
+			w.start();	
+		} else if(theButton == 0){
+			w.interrupt();
+			
 		}
 	}
 }

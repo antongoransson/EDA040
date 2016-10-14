@@ -9,7 +9,7 @@ public class TemperatureController extends PeriodicThread {
 	private TemperatureEvent tEvent;
 
 	public TemperatureController(AbstractWashingMachine theMachine, double speed) {
-		super((long) (1000 / speed)); // TODO: replace with suitable period
+		super((long) (2000 / speed)); // TODO: replace with suitable period
 		this.theMachine = theMachine;
 		tEvent = null;
 	}
@@ -20,15 +20,16 @@ public class TemperatureController extends PeriodicThread {
 			tEvent = tempEvent;
 		}
 		if (tEvent != null) {
-			if (tEvent.getMode() == tEvent.TEMP_IDLE || theMachine.getWaterLevel() == 0) {
+			int mode = tEvent.getMode();
+			if (mode == TemperatureEvent.TEMP_IDLE || theMachine.getWaterLevel() == 0) {
 				theMachine.setHeating(false);
-				// ((RTThread)msg.getSource()).putEvent(new RTEvent(this));
-			} else if (tEvent.getMode() == tEvent.TEMP_SET) {
-				if (theMachine.getTemperature() < 58.5) {
+			//	 ((RTThread)tEvent.getSource()).putEvent(new RTEvent(this));
+			} else if (mode == TemperatureEvent.TEMP_SET) {
+				if (theMachine.getTemperature() < tEvent.getTemperature() -1.7 && (theMachine.getWaterLevel() > 0.5)) {
 					theMachine.setHeating(true);
-				} else if (theMachine.getTemperature() > 59.5) {
+				} else if (theMachine.getTemperature() > tEvent.getTemperature()-0.4) {
+				//	((RTThread)tEvent.getSource()).putEvent(new RTEvent(this));
 					theMachine.setHeating(false);
-
 				}
 			}
 		}

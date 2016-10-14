@@ -1,7 +1,7 @@
 package todo;
 
-import se.lth.cs.realtime.*;
 import done.AbstractWashingMachine;
+import se.lth.cs.realtime.PeriodicThread;
 
 public class SpinController extends PeriodicThread {
 	// TODO: add suitable attributes
@@ -10,9 +10,9 @@ public class SpinController extends PeriodicThread {
 	private SpinEvent sEvent;
 
 	public SpinController(AbstractWashingMachine theMachine, double speed) {
-		super((long) (600000 / speed)); // TODO: replace with suitable period
+		super((long) (60*1000 / speed)); 
 		this.theMachine = theMachine;
-		spinDirection = theMachine.SPIN_LEFT;
+		spinDirection = AbstractWashingMachine.SPIN_LEFT;
 
 	}
 
@@ -23,26 +23,21 @@ public class SpinController extends PeriodicThread {
 		}
 		if (sEvent != null) {
 			int mode = sEvent.getMode();
-			if (mode == sEvent.SPIN_SLOW) {
-				if (spinDirection == theMachine.SPIN_LEFT) {
-					spinDirection = theMachine.SPIN_RIGHT;
+			if (mode == SpinEvent.SPIN_SLOW) {
+				if (spinDirection == AbstractWashingMachine.SPIN_LEFT) {
+					spinDirection = AbstractWashingMachine.SPIN_RIGHT;
 					theMachine.setSpin(spinDirection);
-					System.out.println("Höger");
 				} else {
-					spinDirection = theMachine.SPIN_LEFT;
+					spinDirection = AbstractWashingMachine.SPIN_LEFT;
 					theMachine.setSpin(spinDirection);
-					System.out.println("Vänster");
 				}
-			} else if (mode == sEvent.SPIN_FAST) {
-				spinDirection = theMachine.SPIN_FAST;
+			} else if (mode == SpinEvent.SPIN_FAST && (theMachine.getWaterLevel() == 0)) {
+				spinDirection = AbstractWashingMachine.SPIN_FAST;
 				theMachine.setSpin(spinDirection);
 			} else {
-				spinDirection = theMachine.SPIN_OFF;
+				spinDirection = AbstractWashingMachine.SPIN_OFF;
 				theMachine.setSpin(spinDirection);
 			}
-
-			// ((RTThread)msg.getSource()).putEvent(new RTEvent(this))
-
 		}
 	}
 }
